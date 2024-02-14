@@ -1,45 +1,55 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.17;
 
-interface IERC20 {
-    
-    function totalSupply() external view returns(uint);
-    function balanceOf(address account) external view returns(uint);
-    function transfer(address recipient, uint amount) external returns(bool);
-   
-    event Transfer(address indexed from, address indexed to, uint amount);
-}
-
-contract AjidokwuToken is IERC20 {
-    address public owner;
-    uint public override totalSupply;
-    mapping(address => uint) public override balanceOf;
-    string public name = "AJIDOKWU Tokens";
-    string public symbol = "aji";
+contract AjidokwuTokens {
+    uint public totalSupply;
+    mapping(address => uint) public balanceOf;
+    mapping(address => mapping(address => uint)) public allowance;
+    string public name = "Ajidokwu Tokens";
+    string public symbol = "AJI";
     uint8 public decimals = 18;
 
- 
+		event Transfer(address indexed from, address indexed to, uint value);
+    event Approval(address indexed owner, address indexed spender, uint value);
 
-    constructor() {
-        owner = msg.sender;
-    }
-
-    function transfer(address recipient, uint _amount) external override returns (bool) {
-        uint _charge = (_amount * 10) / 100;
-        balanceOf[msg.sender] -= _amount;
+    function transfer(address recipient, uint amount) external returns (bool) {
+        uint _charge = (amount * 10) / 100;
+        balanceOf[msg.sender] -= amount;
         balanceOf[msg.sender] -= _charge;
-        balanceOf[recipient] += _amount;
+        balanceOf[recipient] += amount;
         burn(_charge);
-
-        emit Transfer(msg.sender, recipient, _amount);
+        balanceOf[recipient] += amount;
+        emit Transfer(msg.sender, recipient, amount);
         return true;
     }
 
+    function approve(address spender, uint amount) external returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint amount
+    ) external returns (bool) {
+        allowance[sender][msg.sender] -= amount;
+        balanceOf[sender] -= amount;
+        balanceOf[recipient] += amount;
+        emit Transfer(sender, recipient, amount);
+        return true;
+    }
+
+    function mint(uint amount) external {
+        balanceOf[msg.sender] += amount;
+        totalSupply += amount;
+        emit Transfer(address(0), msg.sender, amount);
+    }
 
     function burn(uint amount) private {
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
         emit Transfer(msg.sender, address(0), amount);
     }
-
 }
