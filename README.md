@@ -29,10 +29,6 @@ Line 7 is a tad complicated as it is a mapping of an address to another mapping 
 
 they are both the declearation of public strings, strings are a collection of characters, line 8 hold the name of the token and line 9 holds the symbol.
 
-### line 7
-
-sets the address that deploys the contract as the owner of the contract
-
 ### line 12 & 13
 
 events are used to communicate changes in the state of a block chain, and we decleared to one to alert a user of succcessful transfer and the other approval.
