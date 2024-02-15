@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 contract AjidokwuTokens {
     uint private totalSupply;
-    mapping(address => uint) private balances;
+    mapping(address => uint) public balances;
     mapping(address => mapping(address => uint)) public allowance;
     string public name;
     string public symbol;
@@ -50,11 +50,11 @@ constructor(){
     ) external returns (bool) {
         uint _charge = (amount * 10) / 100;
         require((balances[sender] + _charge > 0), "spender does not have sufficient funds for transfer");
-        require(allowance[sender][msg.sender]  > amount, "You do not have sufficient allowance to send");
+        require(allowance[sender][msg.sender]  >= amount, "You do not have sufficient allowance to send");
         allowance[sender][msg.sender] -= amount;
-        balances[msg.sender] -= _charge;
+        balances[sender] -= _charge;
         balances[sender] -= amount;
-        burn(_charge);
+        burnfrom(sender, amount);(_charge);
         balances[recipient] += amount;
         emit Transfer(sender, recipient, amount);
         return true;
@@ -71,6 +71,13 @@ constructor(){
         require(amount > 0, "cannot burn nothing");
         require(balances[msg.sender] >= amount, "You do not have enough tokens to burn");
         balances[msg.sender] -= amount;
+        totalSupply -= amount;
+        emit Transfer(msg.sender, address(0), amount);
+    }
+     function burnfrom(address spender, uint amount) private {
+        require(amount > 0, "cannot burn nothing");
+        require(balances[spender] >= amount, "You do not have enough tokens to burn");
+        balances[spender] -= amount;
         totalSupply -= amount;
         emit Transfer(msg.sender, address(0), amount);
     }
